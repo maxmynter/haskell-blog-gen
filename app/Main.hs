@@ -1,25 +1,34 @@
 module Main (main) where
 
-wrapIn :: String -> String -> String
-wrapIn tag content = "<" ++ tag ++ ">" <> content <> "</" ++ tag ++ ">"
+newtype Html = Html String
 
-html_ :: String -> String
-html_ = wrapIn "html"
+newtype Structure = Structure String
 
-body_ :: String -> String
-body_ = wrapIn "body"
+type Title = String
 
-head_ :: String -> String
-head_ = wrapIn "head"
+el :: String -> String -> String
+el tag content = "<" <> tag <> ">" <> content <> "</" <> tag <> ">"
 
-title_ :: String -> String
-title_ = wrapIn "title"
+html_ :: Title -> Structure -> Html
+html_ title content = Html $ el "html" (el "head" (el "title" title)) <> (el "body" (getStructureString content))
 
-myhtml :: String -> String
-myhtml = html_ . body_
+p_ :: String -> Structure
+p_ = Structure . el "paragraph"
 
-makehtml :: String -> String -> String
-makehtml title body = html_ $ (head_ . title_) title <> body_ body
+h1_ :: String -> Structure
+h1_ = Structure . el "h1"
+
+append_ :: Structure -> Structure -> Structure
+append_ (Structure a) (Structure b) = Structure $ a <> b
+
+getStructureString :: Structure -> String
+getStructureString (Structure s) = s
+
+myhtml :: Html
+myhtml = html_ "Page Title" (append_ (h1_ "Hello World") (p_ "We're Haskellin"))
+
+render :: Html -> String
+render (Html h) = h
 
 main :: IO ()
-main = putStrLn $ makehtml "Page Title" "Page Content"
+main = putStrLn $ render myhtml
