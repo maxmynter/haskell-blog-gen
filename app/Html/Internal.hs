@@ -18,13 +18,19 @@ p_ = Structure . el "paragraph" . escape
 h1_ :: String -> Structure
 h1_ = Structure . el "h1" . escape
 
-ul_ :: [Structure] -> Structure
-ul_ items =
-  Structure $ el "ul" (li_ items)
+mklist :: String -> [Structure] -> Structure
+mklist listT items = Structure $ el listT (l_ items)
   where
-    li_ [] = mempty
-    li_ [i] = el "li" (getStructureString i)
-    li_ (i : is) = (el "li" (getStructureString i)) <> (li_ is)
+    l_ = concat . map (el "li" . getStructureString)
+
+ul_ :: [Structure] -> Structure
+ul_ = mklist "ul"
+
+ol_ :: [Structure] -> Structure
+ol_ = mklist "ol"
+
+code_ :: String -> Structure
+code_ = Structure . el "pre" . escape
 
 append_ :: Structure -> Structure -> Structure
 append_ (Structure a) (Structure b) = Structure $ a <> b
