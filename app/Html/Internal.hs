@@ -13,7 +13,7 @@ data Structure
   | OrderedList [String]
   | CodeBlock [String]
   | Concat Structure Structure
-  deriving (Show)
+  deriving (Show, Eq)
 
 type Title = String
 
