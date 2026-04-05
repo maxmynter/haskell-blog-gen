@@ -1,42 +1,60 @@
 module Html.Internal where
 
-newtype Html = Html String
+import GHC.Natural (Natural)
 
-newtype Structure = Structure String
+type Document = [Structure]
+
+data Structure
+  = Heading Natural String
+  | Paragraph String
+  | UnorderedList [String]
+  | OrderedList [String]
+  | CodeBlock [String]
+
+newtype Html = Html String
 
 type Title = String
 
 el :: String -> String -> String
 el tag content = "<" <> tag <> ">" <> content <> "</" <> tag <> ">"
 
-html_ :: Title -> Structure -> Html
-html_ title content = Html $ el "html" (el "head" (el "title" $ escape title)) <> (el "body" (getStructureString content))
+html_ :: Title -> Document -> Html
+html_ title content =
+  Html $
+    el "html" $
+      el "head" (el "title" (escape title))
+        <> (el "body" (concatMap getStructureString content))
 
 p_ :: String -> Structure
-p_ = Structure . el "paragraph" . escape
+p_ = Paragraph . escape
 
 h1_ :: String -> Structure
-h1_ = Structure . el "h1" . escape
+h1_ = (Heading 1) . escape
 
-mklist :: String -> [Structure] -> Structure
-mklist listT items = Structure $ el listT (l_ items)
-  where
-    l_ = concat . map (el "li" . getStructureString)
+ul_ :: [String] -> Structure
+ul_ = UnorderedList
 
-ul_ :: [Structure] -> Structure
-ul_ = mklist "ul"
-
-ol_ :: [Structure] -> Structure
-ol_ = mklist "ol"
+ol_ :: [String] -> Structure
+ol_ = OrderedList
 
 code_ :: String -> Structure
-code_ = Structure . el "pre" . escape
+code_ = CodeBlock . lines . escape
 
 append_ :: Structure -> Structure -> Structure
-append_ (Structure a) (Structure b) = Structure $ a <> b
+append_ (UnorderedList a) (UnorderedList b) = UnorderedList $ a <> b
+append_ (OrderedList a) (OrderedList b) = OrderedList $ a <> b
+append_ (CodeBlock a) (CodeBlock b) = CodeBlock $ a <> b
+append_ (Heading n1 s1) (Heading _ s2) = Heading n1 (s1 <> s2)
+append_ (Paragraph p1) (Paragraph p2) = Paragraph (p1 <> p2)
+append_ _ _ = error $ "Cannot append incompatible structures"
 
 getStructureString :: Structure -> String
-getStructureString (Structure s) = s
+getStructureString structure = case structure of
+  Heading level text -> el ("h" <> show level) (escape text)
+  Paragraph text -> el ("p") (escape text)
+  UnorderedList items -> el "ul" (concatMap (el "li" . escape) items)
+  OrderedList items -> el "ol" (concatMap (el "li" . escape) items)
+  CodeBlock lines_ -> el "pre" (el "code" (unlines (map escape lines_)))
 
 render :: Html -> String
 render (Html h) = h
@@ -49,6 +67,6 @@ escape =
           '>' -> "&gt;"
           '&' -> "&amp;"
           '"' -> "&quot;"
-          '\'' -> "&#39"
+          '\'' -> "&#39;"
           _ -> [c]
    in concat . map escapeChar
