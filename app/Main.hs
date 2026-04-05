@@ -1,6 +1,7 @@
 module Main (main) where
 
 import Html
+import Markup
 
 testDoc :: Document
 testDoc =

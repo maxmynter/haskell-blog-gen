@@ -1,15 +1,7 @@
 module Html.Internal where
 
-import GHC.Natural (Natural)
-
-type Document = [Structure]
-
-data Structure
-  = Heading Natural String
-  | Paragraph String
-  | UnorderedList [String]
-  | OrderedList [String]
-  | CodeBlock [String]
+import Markup
+import Numeric.Natural
 
 newtype Html = Html String
 

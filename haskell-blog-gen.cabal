@@ -64,6 +64,7 @@ executable haskell-blog-gen
     other-modules:
       Html
       Html.Internal
+      Markup
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
