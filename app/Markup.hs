@@ -4,16 +4,7 @@ module Markup
   )
 where
 
-import Numeric.Natural
-
-type Document = [Structure]
-
-data Structure
-  = Heading Natural String
-  | Paragraph String
-  | UnorderedList [String]
-  | OrderedList [String]
-  | CodeBlock [String]
+import Html.Internal (Document, Structure (..))
 
 parse :: String -> Document
 parse = parseLines [] . lines
@@ -30,3 +21,6 @@ parseLines currentParagraph txts =
 
 trim :: String -> String
 trim = unwords . words
+
+print :: (Show a) => a -> IO ()
+print = putStrLn . show

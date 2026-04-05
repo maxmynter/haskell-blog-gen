@@ -1,14 +1,21 @@
 module Html.Internal where
 
-import Markup
 import Numeric.Natural
 
 newtype Html = Html String
 
-type Title = String
+type Document = [Structure]
 
-el :: String -> String -> String
-el tag content = "<" <> tag <> ">" <> content <> "</" <> tag <> ">"
+data Structure
+  = Heading Natural String
+  | Paragraph String
+  | UnorderedList [String]
+  | OrderedList [String]
+  | CodeBlock [String]
+  | Concat Structure Structure
+  deriving (Show)
+
+type Title = String
 
 html_ :: Title -> Document -> Html
 html_ title content =
@@ -16,6 +23,26 @@ html_ title content =
     el "html" $
       el "head" (el "title" (escape title))
         <> (el "body" (concatMap getStructureString content))
+
+el :: String -> String -> String
+el tag content = "<" <> tag <> ">" <> content <> "</" <> tag <> ">"
+
+instance Semigroup Structure where
+  (<>) (Heading n h1) (Heading _ h2) = Heading n (h1 <> h2)
+  (<>) (Paragraph s) (Paragraph t) = Paragraph (s <> t)
+  (<>) (UnorderedList u) (UnorderedList v) = UnorderedList (u <> v)
+  (<>) (OrderedList o) (OrderedList p) = OrderedList (o <> p)
+  (<>) (CodeBlock c) (CodeBlock d) = CodeBlock (c <> d)
+  (<>) s1 s2 = Concat s1 s2
+
+getStructureString :: Structure -> String
+getStructureString structure = case structure of
+  Heading level text -> el ("h" <> show level) (escape text)
+  Paragraph text -> el ("p") (escape text)
+  UnorderedList items -> el "ul" (concatMap (el "li" . escape) items)
+  OrderedList items -> el "ol" (concatMap (el "li" . escape) items)
+  CodeBlock lines_ -> el "pre" (el "code" (unlines (map escape lines_)))
+  Concat s1 s2 -> (getStructureString s1) ++ (getStructureString s2)
 
 p_ :: String -> Structure
 p_ = Paragraph . escape
@@ -31,22 +58,6 @@ ol_ = OrderedList
 
 code_ :: String -> Structure
 code_ = CodeBlock . lines . escape
-
-append_ :: Structure -> Structure -> Structure
-append_ (UnorderedList a) (UnorderedList b) = UnorderedList $ a <> b
-append_ (OrderedList a) (OrderedList b) = OrderedList $ a <> b
-append_ (CodeBlock a) (CodeBlock b) = CodeBlock $ a <> b
-append_ (Heading n1 s1) (Heading _ s2) = Heading n1 (s1 <> s2)
-append_ (Paragraph p1) (Paragraph p2) = Paragraph (p1 <> p2)
-append_ _ _ = error $ "Cannot append incompatible structures"
-
-getStructureString :: Structure -> String
-getStructureString structure = case structure of
-  Heading level text -> el ("h" <> show level) (escape text)
-  Paragraph text -> el ("p") (escape text)
-  UnorderedList items -> el "ul" (concatMap (el "li" . escape) items)
-  OrderedList items -> el "ol" (concatMap (el "li" . escape) items)
-  CodeBlock lines_ -> el "pre" (el "code" (unlines (map escape lines_)))
 
 render :: Html -> String
 render (Html h) = h
