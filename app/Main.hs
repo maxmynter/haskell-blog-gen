@@ -1,58 +1,58 @@
 module Main (main) where
 
-import Html
-import Markup
+import qualified Html
+import qualified Markup
 
-testDoc :: Document
+testDoc :: Html.Document
 testDoc =
-  [ Heading 1 "Hello World",
-    Paragraph "Paragraph 1",
-    Paragraph "We're Haskellin <3",
-    UnorderedList ["Haskell", "Rust", "Python"]
+  [ Html.Heading 1 "Hello World",
+    Html.Paragraph "Paragraph 1",
+    Html.Paragraph "We're Haskellin <3",
+    Html.UnorderedList ["Haskell", "Rust", "Python"]
   ]
 
-hello :: Document
-hello = [Paragraph "Hello, world!"]
+hello :: Html.Document
+hello = [Html.Paragraph "Hello, world!"]
 
-welcome :: Document
-welcome = [Heading 1 "Welcome", Paragraph "To this tutorial about Haskell"]
+welcome :: Html.Document
+welcome = [Html.Heading 1 "Welcome", Html.Paragraph "To this tutorial about Haskell"]
 
-lists :: Document
+lists :: Html.Document
 lists =
-  [ Paragraph "Remember that multiple lines with no separation are grouped together into a single paragraph but list items remain separate.",
-    OrderedList
+  [ Html.Paragraph "Remember that multiple lines with no separation are grouped together into a single paragraph but list items remain separate.",
+    Html.OrderedList
       [ "Item 1 of a list",
         "Item 2 of the same list"
       ]
   ]
 
-doc :: Document
+doc :: Html.Document
 doc =
-  [ Heading 1 "Compiling programs with ghc",
-    Paragraph "Running ghc invokes the Glasgow Haskell Compiler (GHC), and can be used to compile Haskell modules and programs into native executables and libraries.",
-    Paragraph "Create a new Haskell source file named hello.hs, and write the following code in it:",
-    CodeBlock
+  [ Html.Heading 1 "Compiling programs with ghc",
+    Html.Paragraph "Running ghc invokes the Glasgow Haskell Compiler (GHC), and can be used to compile Haskell modules and programs into native executables and libraries.",
+    Html.Paragraph "Create a new Haskell source file named hello.hs, and write the following code in it:",
+    Html.CodeBlock
       [ "main = putStrLn \"Hello, Haskell!\""
       ],
-    Paragraph "Now, we can compile the program by invoking ghc with the file name:",
-    CodeBlock
+    Html.Paragraph "Now, we can compile the program by invoking ghc with the file name:",
+    Html.CodeBlock
       [ "➜ ghc hello.hs",
         "[1 of 1] Compiling Main             ( hello.hs, hello.o )",
         "Linking hello ..."
       ],
-    Paragraph "GHC created the following files:",
-    UnorderedList
+    Html.Paragraph "GHC created the following files:",
+    Html.UnorderedList
       [ "hello.hi - Haskell interface file",
         "hello.o - Object file, the output of the compiler before linking",
         "hello (or hello.exe on Microsoft Windows) - A native runnable executable."
       ],
-    Paragraph "GHC will produce an executable when the source file satisfies both conditions:",
-    OrderedList
+    Html.Paragraph "GHC will produce an executable when the source file satisfies both conditions:",
+    Html.OrderedList
       [ "Defines the main function in the source file",
         "Defines the module name to be Main or does not have a module declaration"
       ],
-    Paragraph "Otherwise, it will only produce the .o and .hi files."
+    Html.Paragraph "Otherwise, it will only produce the .o and .hi files."
   ]
 
 main :: IO ()
-main = mapM_ (putStrLn . render) (map (html_ "TestTitle") [testDoc, hello, welcome, lists, doc])
+main = mapM_ (putStrLn . Html.render) (map (Html.html_ "TestTitle") [testDoc, hello, welcome, lists, doc])

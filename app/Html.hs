@@ -1,8 +1,15 @@
 module Html
   ( Html,
     Title,
+    h1_,
+    p_,
+    ul_,
+    ol_,
+    code_,
     html_,
     render,
+    Structure (..),
+    Document,
   )
 where
 

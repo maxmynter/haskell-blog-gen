@@ -5,7 +5,18 @@ module Markup
 where
 
 import Data.Maybe
-import Html.Internal (Document, Structure (..))
+import Numeric.Natural
+
+type Document = [Structure]
+
+data Structure
+  = Heading Natural String
+  | Paragraph String
+  | UnorderedList [String]
+  | OrderedList [String]
+  | CodeBlock [String]
+  | Concat Structure Structure
+  deriving (Show, Eq)
 
 parse :: String -> Document
 parse = parseLines Nothing . lines
