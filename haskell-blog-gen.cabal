@@ -65,6 +65,7 @@ executable haskell-blog-gen
       Html
       Html.Internal
       Markup
+      Convert
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

@@ -12,11 +12,20 @@ type Document = [Structure]
 data Structure
   = Heading Natural String
   | Paragraph String
-  | UnorderedList [String]
-  | OrderedList [String]
-  | CodeBlock [String]
+  | UnorderedList [Structure]
+  | OrderedList [Structure]
+  | CodeBlock [Structure]
   | Concat Structure Structure
+  | Empty
   deriving (Show, Eq)
+
+instance Semigroup Structure where
+  (<>) = Concat
+
+instance Monoid Structure where
+  mempty = Empty
+  mconcat (a : as) = a <> (mconcat as)
+  mconcat [] = Empty
 
 parse :: String -> Document
 parse = parseLines Nothing . lines
@@ -29,14 +38,14 @@ parseLines context txts =
     ('*' : ' ' : line) : rest -> maybe id (:) context (Heading 1 (trim line) : parseLines Nothing rest)
     -- Unordered List
     ('-' : ' ' : line) : rest -> case context of
-      Just (UnorderedList list) -> parseLines (Just (UnorderedList (list <> [trim line]))) rest
-      _ -> maybe id (:) context (parseLines (Just (UnorderedList [trim line])) rest)
+      Just (UnorderedList list) -> parseLines (Just (UnorderedList (list <> [Paragraph $ trim line]))) rest
+      _ -> maybe id (:) context (parseLines (Just (UnorderedList [Paragraph $ trim line])) rest)
     ('#' : ' ' : line) : rest -> case context of
-      Just (OrderedList list) -> parseLines (Just (OrderedList (list <> [trim line]))) rest
-      _ -> maybe id (:) context (parseLines (Just (OrderedList [trim line])) rest)
+      Just (OrderedList list) -> parseLines (Just (OrderedList (list <> [Paragraph $ trim line]))) rest
+      _ -> maybe id (:) context (parseLines (Just (OrderedList [Paragraph $ trim line])) rest)
     ('>' : ' ' : line) : rest -> case context of
-      Just (CodeBlock code) -> parseLines (Just (CodeBlock (code <> [line]))) rest
-      _ -> maybe id (:) context (parseLines (Just (CodeBlock [line])) rest)
+      Just (CodeBlock code) -> parseLines (Just (CodeBlock (code <> [Paragraph $ trim line]))) rest
+      _ -> maybe id (:) context (parseLines (Just (CodeBlock [Paragraph $ trim line])) rest)
     -- Paragraph
     currentLine : rest ->
       let line = trim currentLine
