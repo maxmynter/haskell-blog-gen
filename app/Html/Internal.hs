@@ -47,8 +47,11 @@ getStructureString structure = case structure of
 p_ :: String -> Structure
 p_ = Paragraph . escape
 
+h_ :: Natural -> String -> Structure
+h_ n txt = Heading n $ escape txt
+
 h1_ :: String -> Structure
-h1_ = (Heading 1) . escape
+h1_ = h_ 1
 
 ul_ :: [String] -> Structure
 ul_ = UnorderedList
